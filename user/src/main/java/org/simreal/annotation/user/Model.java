@@ -12,8 +12,15 @@ public class Model {
         System.out.println("Hello Simulation");
     }
 
-    @SimDB(name = "agents_data")
-    public ArrayList<Agent> toDBAgents()
+    @SimDB(name = "controllers_data")
+    public ArrayList<Agent> controllersToDB()
+    {
+        return null;
+
+    }
+
+    @SimDB(name = "oracles_data")
+    public ArrayList<Agent> oraclesToDB()
     {
         return null;
 

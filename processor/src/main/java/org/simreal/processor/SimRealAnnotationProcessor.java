@@ -3,7 +3,6 @@ package org.simreal.processor;
 import com.google.auto.service.AutoService;
 import com.google.gson.Gson;
 import com.squareup.javapoet.*;
-import org.checkerframework.checker.units.qual.A;
 import org.simreal.annotation.*;
 import org.simreal.processor.DTO.*;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -22,6 +21,7 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @AutoService(Processor.class)
@@ -79,10 +79,14 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         if(round == 0)
         {
             // generate meta-data
+//                makeModelMetaInfo(roundEnv);
             try {
                 makeModelMetaInfo(roundEnv);
             } catch (Exception e) {
                 e.printStackTrace();
+                System.out.println(e.getMessage());
+                round ++;
+                return false;
             }
 
             // process database
@@ -108,7 +112,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         return true;
     }
 
-    public boolean makeModelMetaInfo(RoundEnvironment roundEnv) throws Exception
+    public boolean makeModelMetaInfo(RoundEnvironment roundEnv) throws Exception, IllegalArgumentException
     {
         Gson gson = new Gson();
 
@@ -116,14 +120,15 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         modelDTO = new ModelDTO();
         Set<? extends Element> modelElementSet = roundEnv.getElementsAnnotatedWith(SimModel.class);
         // the usage of the SimModel annotation should be only one
-        if(modelElementSet.size() > 0)
+        System.out.println(modelElementSet.size());
+        if(modelElementSet.size() == 1)
         {
             // Element element = modelElementSet.stream().collect(Collectors.toList()).get(0);
             Element element = modelElementSet.stream().findFirst().get();
             modelDTO.setName(element.getSimpleName().toString());
             modelDTO.setClassName(ClassName.get((TypeElement) element));
         } else {
-            throw new Exception("SimModel Annotation should be only 1");
+            throw new RuntimeException("Incorrect instance of @SimModel annotation. Only 1 is allowed and its required.");
         }
 
         System.out.println(gson.toJson(modelDTO));
@@ -143,12 +148,21 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         System.out.println(gson.toJson(paramDTOList,ArrayList.class));
 
         // Extract database annotation data, with agents field level annotations
+        Set<String> uniqueDBNames = new HashSet<>();
         databaseDTOList = new ArrayList<>();
         Set<? extends Element> toDBElementSet = roundEnv.getElementsAnnotatedWith(SimDB.class);
         for(Element elt: toDBElementSet) {
-            DatabaseDTO databaseDTO = new DatabaseDTO();
+            SimDB db_annotation = elt.getAnnotation(SimDB.class);
+            String name = db_annotation.name();
+            // check if the db_name already exists ... and raise and exception if it already does
+            if (uniqueDBNames.contains(name)) {
+                // Duplicate name found, raise an exception
+                throw new IllegalArgumentException("Duplicate @SimDB annotation with the same name value: " + name);
+            }
+            uniqueDBNames.add(name);
 
-            databaseDTO.setTableName(elt.getAnnotation(SimDB.class).name());
+            DatabaseDTO databaseDTO = new DatabaseDTO();
+            databaseDTO.setTableName(db_annotation.name());
             databaseDTO.setMethodName(elt.getSimpleName().toString());
             // get the Agent class related to the database persisting method
             TypeMirror type = ((ExecutableElement) elt).getReturnType();
@@ -187,7 +201,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         visualDTO = new VisualDTO();
         Set<? extends Element> visualElementSet = roundEnv.getElementsAnnotatedWith(SimVisual.class);
         // the usage of the SimModel annotation should be only one
-        if(visualElementSet.size() > 0)
+        if(visualElementSet.size() <= 1)
         {
             Element element = visualElementSet.stream().findFirst().get();
             visualDTO.setModelMethodName(element.getSimpleName().toString());
@@ -230,6 +244,12 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
 
     public boolean generateDBMethod(RoundEnvironment roundEnv)
     {
+        //            String send_agt_data_method_name = String.format("%sSendData", dbDTO.getBoundedAgentName().simpleName().toString());
+        String send_agt_data_method_name = "sendAgentsData";
+        MethodSpec.Builder sendAgentsDataMethod = MethodSpec.methodBuilder(send_agt_data_method_name)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(modelDTO.getClassName(), "model");
+
         for(DatabaseDTO dbDTO: databaseDTOList)
         {
             // generate get agent data method
@@ -244,21 +264,41 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
                     ClassName.get(Object.class));
             for(FieldDTO temp_agt_field: agt_db_fields)
             {
-                //TODO find better ways to capitalize field name
-                String field_name_capitalized = temp_agt_field.getName().substring(0, 1).toUpperCase() + temp_agt_field.getName().substring(1);
+                // Capitalize the first letter of the agent name using StringBuilder
+                StringBuilder agt_name_sb = new StringBuilder(temp_agt_field.getName());
+                agt_name_sb.setCharAt(0, Character.toUpperCase(agt_name_sb.charAt(0)));
+//                String field_name_capitalized = temp_agt_field.getName().substring(0, 1).toUpperCase() + temp_agt_field.getName().substring(1);
+                String field_name_capitalized = agt_name_sb.toString();
                 getAgentCode.addStatement("sim_data.put(\"$L\", agent.get$L())", temp_agt_field.getName(), field_name_capitalized);
             }
             getAgentCode.addStatement("return sim_data");
 
-            String agt_data_method_name = String.format("%sData", dbDTO.getBoundedAgentName().simpleName().toString());
-            MethodSpec getAgentDataMethod = MethodSpec.methodBuilder(agt_data_method_name)
-                    .addModifiers(Modifier.PUBLIC)
-                    .returns(parameterized_map_type)
-                    .addParameter(modelDTO.getClassName(), "model")
-                    .addParameter(dbDTO.getBoundedAgentName(), "agent")
-                    .addCode(getAgentCode.build())
-                    .build();
-            agentDataMethodsList.add(getAgentDataMethod);
+            String agt_data_method_name = String.format("get%sData", dbDTO.getBoundedAgentName().simpleName().toString());
+            MethodSpec getAgentDataMethod = MethodSpec.methodBuilder(agt_data_method_name).build();
+            // check if the agent data getter method is already defined
+            boolean is_agt_data_method_exist = false;
+            for(MethodSpec temp_agt_method: agentDataMethodsList)
+            {
+                if(temp_agt_method.name.toString().equals(agt_data_method_name))
+                {
+                    is_agt_data_method_exist = true;
+                    getAgentDataMethod = temp_agt_method;
+                    break;
+                }
+            }
+            // if the agent data getter method is not already defined, define it
+            if(!is_agt_data_method_exist)
+            {
+                getAgentDataMethod = MethodSpec.methodBuilder(agt_data_method_name)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(parameterized_map_type)
+                        .addParameter(modelDTO.getClassName(), "model")
+                        .addParameter(dbDTO.getBoundedAgentName(), "agent")
+                        .addCode(getAgentCode.build())
+                        .build();
+
+                agentDataMethodsList.add(getAgentDataMethod);
+            }
 
             // loop through db agent method and send data to kafka
             CodeBlock.Builder send_agt_data_code = CodeBlock.builder();
@@ -266,16 +306,11 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
             send_agt_data_code.addStatement("kafkaTemplate.send(\"db\", \"$L\", $N(model, temp_agt))", dbDTO.getTableName(), getAgentDataMethod);
             send_agt_data_code.endControlFlow();
 
-            String send_agt_data_method_name = String.format("%sSendData", dbDTO.getBoundedAgentName().simpleName().toString());
-            MethodSpec sendAgentDataMethod = MethodSpec.methodBuilder(send_agt_data_method_name)
-                    .addModifiers(Modifier.PUBLIC)
-                    .addParameter(modelDTO.getClassName(), "model")
-                    .addParameter(dbDTO.getBoundedAgentName(), "agent")
-                    .addCode(send_agt_data_code.build())
-                    .build();
-
-            dbMethodsList.add(sendAgentDataMethod);
+            sendAgentsDataMethod.addComment("send $L agent's data", dbDTO.getBoundedAgentName().simpleName())
+                            .addCode(send_agt_data_code.build());
+//            dbMethodsList.add(sendAgentDataMethod);
         }
+        dbMethodsList.add(sendAgentsDataMethod.build());
         return true;
     }
 
