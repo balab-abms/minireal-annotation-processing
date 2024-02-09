@@ -1,0 +1,6 @@
+rootProject.name = 'simreal-annotation-processing'
+include 'processor'
+include 'annotation'
+include 'annotation'
+include 'user'
+
