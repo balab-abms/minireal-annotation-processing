@@ -25,6 +25,11 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
     implementation 'org.springframework.kafka:spring-kafka:2.8.0'
 
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
+
+//    implementation files('libs/mason.20.jar')
+
 }
 
 jar {

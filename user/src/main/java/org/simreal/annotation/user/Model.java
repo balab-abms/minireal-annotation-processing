@@ -2,13 +2,15 @@ package org.simreal.annotation.user;
 
 import org.simreal.annotation.*;
 import org.simreal.processor.DTO.ModelDTO;
+import sim.engine.SimState;
 
 import java.util.ArrayList;
 
 @SimModel
-public class Model {
+public class Model extends SimState {
     public Model(@SimParam(value = "50") int popln,
                  @SimParam(value = "true") boolean wealth){
+        super(System.currentTimeMillis());
         System.out.println("Hello Simulation");
     }
 

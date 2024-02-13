@@ -1,7 +1,9 @@
 package org.simreal.processor;
 
+import com.example.application.kafkaserialize.KafkaTemplateSerializer;
 import com.google.auto.service.AutoService;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.squareup.javapoet.*;
 import org.simreal.annotation.*;
 import org.simreal.processor.DTO.*;
@@ -18,10 +20,12 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Writer;
+import java.lang.reflect.Type;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @AutoService(Processor.class)
@@ -43,6 +47,12 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
     private CodeBlock paramsCodeblock;
     private ArrayList<MethodSpec> agentDataMethodsList;
     private TypeSpec simLauncherCode;
+    private Map<String, String> types_map = new HashMap<>();
+    String kafka_template_field_name = "kafkaTemplate";
+    String sim_param_field_name = "sim_params";
+    String sim_model_var_name = "model";
+    String sim_is_step_var_name = "is_step";
+    String sim_launcher_class_name = "SimulationLauncher";
 
     // define annotation processing related variables
     private ProcessingEnvironment processingEnv;
@@ -76,10 +86,18 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        // initialize types map
+        types_map.put("int", "Integer.parseInt");
+        types_map.put("long", "Long.parseLong");
+        types_map.put("double", "Double.parseDouble");
+        types_map.put("float", "Float.parseFloat");
+        types_map.put("boolean", "Boolean.parseBoolean");
+        types_map.put("byte", "Byte.parseByte");
+        types_map.put("short", "Short.parseShort");
+
         if(round == 0)
         {
             // generate meta-data
-//                makeModelMetaInfo(roundEnv);
             try {
                 makeModelMetaInfo(roundEnv);
             } catch (Exception e) {
@@ -106,7 +124,6 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
             // generate code
             generateSimLauncherCode();
         }
-
         round ++;
 
         return true;
@@ -142,8 +159,22 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
             paramDTO.setName(elt.getSimpleName().toString());
             paramDTO.setValue(elt.getAnnotation(SimParam.class).value());
             paramDTO.setType(elt.asType().toString());
+            paramDTO.setIsdefault(false);
             paramDTOList.add(paramDTO);
         }
+        // add steps, tick_delay default params
+        ParamDTO steps_param = new ParamDTO();
+        steps_param.setName("steps");
+        steps_param.setValue("100");
+        steps_param.setType("int");
+        steps_param.setIsdefault(true);
+        paramDTOList.add(steps_param);
+        ParamDTO tick_delay_param = new ParamDTO();
+        tick_delay_param.setName("tick_delay");
+        tick_delay_param.setValue("100");
+        tick_delay_param.setType("int");
+        tick_delay_param.setIsdefault(true);
+        paramDTOList.add(tick_delay_param);
 
         System.out.println(gson.toJson(paramDTOList,ArrayList.class));
 
@@ -322,21 +353,54 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
                 ClassName.get(String.class),
                 ClassName.get(Object.class));
         // define the member variables for the simulation launcher class
-        FieldSpec kafka_template_field = FieldSpec.builder(kafka_template_type, "kafkaTemplate")
+        FieldSpec kafka_template_field = FieldSpec.builder(kafka_template_type, kafka_template_field_name)
                 .addModifiers(Modifier.PRIVATE)
                 .build();
+
+        ParameterizedTypeName sim_params_map_type = ParameterizedTypeName.get(
+                ClassName.get(HashMap.class),
+                ClassName.get(String.class),
+                ClassName.get(Object.class));
+        FieldSpec sim_params_field = FieldSpec.builder(sim_params_map_type, sim_param_field_name)
+                .addModifiers(Modifier.PRIVATE)
+                .build();
+
+        // define run method code block
+        generateSimParamsRunMethodCode();
         // define the simulation launcher constructor
         MethodSpec simConstructor = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(kafka_template_type, "kafkaTemplate")
-                .addStatement("this.kafkaTemplate = kafkaTemplate")
+                .addParameter(kafka_template_type, kafka_template_field_name)
+                .addParameter(sim_params_map_type, sim_param_field_name)
+                .addStatement("this.$L = $L", kafka_template_field_name, kafka_template_field_name)
+                .addStatement("this.$L = $L", sim_param_field_name, sim_param_field_name)
+                .build();
+        // define run method
+        MethodSpec runMethod = MethodSpec.methodBuilder("run")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(void.class)
+                .addAnnotation(Override.class)
+                .addComment("setup simulation and model arguments")
+                .addCode(generateSimParamsRunMethodCode())
+                .addCode(generateDataSendingRunMethodCode())
                 .build();
 
+        // define main method
+        MethodSpec mainMethod = MethodSpec.methodBuilder("main")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(void.class)
+                .addParameter(String[].class, "args")
+                .addCode(generateMainMethodCode())
+                .build();
 
-        simLauncherCode = TypeSpec.classBuilder("SimulationLauncher")
+        simLauncherCode = TypeSpec.classBuilder(sim_launcher_class_name)
                 .addModifiers(Modifier.PUBLIC)
+                .addSuperinterface(Runnable.class)
                 .addField(kafka_template_field)
+                .addField(sim_params_field)
                 .addMethod(simConstructor)
+                .addMethod(runMethod)
+                .addMethod(mainMethod)
                 .addMethods(agentDataMethodsList)
                 .addMethods(dbMethodsList)
                 .build();
@@ -353,4 +417,141 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
 
         return true;
     }
+
+    // a helper methods to generate different code parts of the run method and main method
+    private CodeBlock generateSimParamsRunMethodCode()
+    {
+        CodeBlock.Builder run_method_sim_params_code = CodeBlock.builder();
+        for(ParamDTO temp_sim_param: paramDTOList)
+        {
+            String type_parser_code = types_map.getOrDefault(temp_sim_param.getType(), "String.valueOf");
+            run_method_sim_params_code.addStatement("$L $L = $L($L.containsKey(\"$L\") ? $L.get(\"$L\").toString() : \"$L\")",
+                    temp_sim_param.getType(),
+                    temp_sim_param.getName(),
+                    type_parser_code,
+                    sim_param_field_name,
+                    temp_sim_param.getName(),
+                    sim_param_field_name,
+                    temp_sim_param.getName(),
+                    temp_sim_param.getValue()
+            );
+        }
+        return run_method_sim_params_code.build();
+    }
+
+    private CodeBlock generateDataSendingRunMethodCode()
+    {
+        ArrayList<String> models_args_list = new ArrayList<>();
+        paramDTOList.forEach(temp_param -> {
+            if(!temp_param.isdefault)
+                models_args_list.add(temp_param.getName());
+        });
+        String models_args_str = String.join(", ", models_args_list);
+        CodeBlock.Builder run_method_data_sending_code = CodeBlock.builder();
+        run_method_data_sending_code.addStatement("$T $L = new $T($L)",
+                modelDTO.getClassName(),
+                sim_model_var_name,
+                modelDTO.getClassName(),
+                models_args_str
+        );
+
+        run_method_data_sending_code.beginControlFlow("do");
+
+
+        for(MethodSpec temp_data_method: dbMethodsList)
+        {
+            run_method_data_sending_code.addStatement("$L($L)", temp_data_method.name, sim_model_var_name);
+        }
+        run_method_data_sending_code.addStatement("$T $L = $L.schedule.step($L)", boolean.class, sim_is_step_var_name, sim_model_var_name, sim_model_var_name);
+        run_method_data_sending_code.addStatement("if (!$L) break", sim_is_step_var_name);
+
+
+        run_method_data_sending_code.beginControlFlow("try");
+        run_method_data_sending_code.addStatement("$T.sleep($L)", Thread.class, "tick_delay");
+        run_method_data_sending_code.nextControlFlow("catch($T e)", InterruptedException.class);
+        run_method_data_sending_code.addStatement("throw new $T(e)", RuntimeException.class);
+        run_method_data_sending_code.endControlFlow();
+
+        run_method_data_sending_code.endControlFlow();
+        run_method_data_sending_code.addStatement("while ($L.schedule.getSteps() < steps)", sim_model_var_name);
+
+        return run_method_data_sending_code.build();
+    }
+
+    private CodeBlock generateMainMethodCode()
+    {
+        // define used var names
+        String ois_instance_name = "ois";
+        String kafka_template_serializer_instance_name = "kafkaTemplateSerializer";
+        String kafka_template_deserialized_name  = "kafkaTemplate_deserialized";
+        String model_params_deserialized_name = "modelParams_deserialized";
+        String hash_type_name = "hash_type";
+        String runnable_model_obj_name = "model_obj";
+        String model_thread_name = "model_thread";
+
+        CodeBlock.Builder main_method_code = CodeBlock.builder();
+        main_method_code.beginControlFlow("try");
+        main_method_code.addStatement("// get kafka template from args");
+        main_method_code.addStatement("$T $L = new $T(new $T(args[0]))",
+                ObjectInputStream.class,
+                ois_instance_name,
+                ObjectInputStream.class,
+                FileInputStream.class);
+        main_method_code.addStatement("$T $L = ($T) $L.readObject()",
+                KafkaTemplateSerializer.class,
+                kafka_template_serializer_instance_name,
+                KafkaTemplateSerializer.class,
+                ois_instance_name);
+        main_method_code.addStatement("ois.close()");
+        // define Kafka template parametrized type
+        ParameterizedTypeName kafka_template_type = ParameterizedTypeName.get(
+                ClassName.get(KafkaTemplate.class),
+                ClassName.get(String.class),
+                ClassName.get(Object.class));
+        main_method_code.addStatement("$T $L = $L.getKafkaTemplate()",
+                kafka_template_type,
+                kafka_template_deserialized_name,
+                kafka_template_serializer_instance_name);
+        // define embedded class types
+        ParameterizedTypeName hash_map_type = ParameterizedTypeName.get(
+                ClassName.get(HashMap.class),
+                ClassName.get(String.class),
+                ClassName.get(Object.class));
+        ParameterizedTypeName type_token_type = ParameterizedTypeName.get(
+                ClassName.get(TypeToken.class),
+                hash_map_type);
+        main_method_code.addStatement("// get model parameters from args");
+        main_method_code.addStatement("$T $L = new $T(){}.getType()",
+                Type.class,
+                hash_type_name,
+                type_token_type);
+        main_method_code.addStatement("$T $L = args.length > 1 ? new $T().fromJson(args[1], $L) : new $T<>()",
+                hash_map_type,
+                model_params_deserialized_name,
+                Gson.class,
+                hash_type_name,
+                HashMap.class);
+        main_method_code.addStatement("System.out.println($L.toString())", model_params_deserialized_name);
+
+        main_method_code.addStatement("// run simulation");
+        main_method_code.addStatement("$T $L = new $L($L, $L)",
+                Runnable.class,
+                runnable_model_obj_name,
+                sim_launcher_class_name,
+                kafka_template_deserialized_name,
+                model_params_deserialized_name);
+        main_method_code.addStatement("$T $L = new $T($L)",
+                Thread.class,
+                model_thread_name,
+                Thread.class,
+                runnable_model_obj_name);
+        main_method_code.addStatement("$L.start()", model_thread_name);
+        main_method_code.nextControlFlow("catch($T | $T e)", IOException.class, ClassNotFoundException.class);
+        main_method_code.addStatement("throw new $T(e)", RuntimeException.class);
+        main_method_code.endControlFlow();
+
+        return main_method_code.build();
+
+    }
+
 }

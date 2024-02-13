@@ -1,9 +1,12 @@
 package org.simreal.processor.DTO;
 
+import com.squareup.javapoet.ClassName;
+
 public class ParamDTO {
     public String name;
     public String value;
     public String type;
+    public boolean isdefault;
 
     public String getName() {
         return name;
@@ -26,5 +29,13 @@ public class ParamDTO {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public boolean isIsdefault() {
+        return isdefault;
+    }
+
+    public void setIsdefault(boolean isdefault) {
+        this.isdefault = isdefault;
     }
 }

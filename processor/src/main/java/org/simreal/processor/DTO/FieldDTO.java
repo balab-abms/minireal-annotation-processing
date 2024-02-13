@@ -1,5 +1,7 @@
 package org.simreal.processor.DTO;
 
+import com.squareup.javapoet.ClassName;
+
 public class FieldDTO {
     public String name;
     public String type;
