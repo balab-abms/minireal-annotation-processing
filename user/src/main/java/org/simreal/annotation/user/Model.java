@@ -29,7 +29,12 @@ public class Model extends SimState {
     }
 
     @SimChart(name = "line_chart")
-    public double toChart(){
+    public double toRoundChart(){
+        return 0;
+    }
+
+    @SimChart(name = "avg_chart")
+    public double toAvgChart(){
         return 0;
     }
 

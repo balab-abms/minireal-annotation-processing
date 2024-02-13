@@ -42,7 +42,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
 
     // define generated simulation launcher methods related variables
     private ArrayList<MethodSpec> dbMethodsList;
-    private ArrayList<MethodSpec> chartMethodsList;
+    private MethodSpec chartMethod;
     private MethodSpec visualMethod;
     private CodeBlock paramsCodeblock;
     private ArrayList<MethodSpec> agentDataMethodsList;
@@ -113,7 +113,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
             generateDBMethod(roundEnv);
 
             // process chart
-            chartMethodsList = new ArrayList<>();
+            generateChartMethod(roundEnv);
 
             // process visual
             // visualMethod =
@@ -217,9 +217,19 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         System.out.println(gson.toJson(databaseDTOList,ArrayList.class));
 
         // Extract Charting annotation data
+        Set<String> uniqueChartNames = new HashSet<>();
         chartDTOList = new ArrayList<>();
         Set<? extends Element> toChartElementSet = roundEnv.getElementsAnnotatedWith(SimChart.class);
         for(Element elt: toChartElementSet) {
+            SimChart chart_annotation = elt.getAnnotation(SimChart.class);
+            String name = chart_annotation.name();
+            // check if the chart_name already exists ... and raise and exception if it already does
+            if (uniqueChartNames.contains(name)) {
+                // Duplicate name found, raise an exception
+                throw new IllegalArgumentException("Duplicate @SimChart annotation with the same name value: " + name);
+            }
+            uniqueChartNames.add(name);
+
             ChartDTO chartDTO = new ChartDTO();
 
             chartDTO.setChartName(elt.getAnnotation(SimChart.class).name());
@@ -275,7 +285,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
 
     public boolean generateDBMethod(RoundEnvironment roundEnv)
     {
-        //            String send_agt_data_method_name = String.format("%sSendData", dbDTO.getBoundedAgentName().simpleName().toString());
+        // String send_agt_data_method_name = String.format("%sSendData", dbDTO.getBoundedAgentName().simpleName().toString());
         String send_agt_data_method_name = "sendAgentsData";
         MethodSpec.Builder sendAgentsDataMethod = MethodSpec.methodBuilder(send_agt_data_method_name)
                 .addModifiers(Modifier.PUBLIC)
@@ -334,7 +344,11 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
             // loop through db agent method and send data to kafka
             CodeBlock.Builder send_agt_data_code = CodeBlock.builder();
             send_agt_data_code.beginControlFlow("for ($T temp_agt: model.$L())", dbDTO.getBoundedAgentName(), dbDTO.getMethodName());
-            send_agt_data_code.addStatement("kafkaTemplate.send(\"db\", \"$L\", $N(model, temp_agt))", dbDTO.getTableName(), getAgentDataMethod);
+            send_agt_data_code.addStatement("$L.send(\"db\", \"$L\", $N($L, temp_agt))",
+                    kafka_template_field_name,
+                    dbDTO.getTableName(),
+                    getAgentDataMethod,
+                    sim_model_var_name);
             send_agt_data_code.endControlFlow();
 
             sendAgentsDataMethod.addComment("send $L agent's data", dbDTO.getBoundedAgentName().simpleName())
@@ -342,6 +356,25 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
 //            dbMethodsList.add(sendAgentDataMethod);
         }
         dbMethodsList.add(sendAgentsDataMethod.build());
+        return true;
+    }
+
+    public boolean generateChartMethod(RoundEnvironment roundEnv)
+    {
+        MethodSpec.Builder temp_chart_method = MethodSpec.methodBuilder("sendChartingData")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(modelDTO.getClassName(), "model")
+                .returns(void.class);
+        for(ChartDTO temp_chart_dto: chartDTOList)
+        {
+            temp_chart_method.addStatement("$L.send(\"chart\", \"$L\", $L.$L())",
+                    kafka_template_field_name,
+                    temp_chart_dto.chartName,
+                    sim_model_var_name,
+                    temp_chart_dto.methodName);
+        }
+
+        chartMethod = temp_chart_method.build();
         return true;
     }
 
@@ -403,6 +436,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
                 .addMethod(mainMethod)
                 .addMethods(agentDataMethodsList)
                 .addMethods(dbMethodsList)
+                .addMethod(chartMethod)
                 .build();
 
         try
@@ -457,11 +491,14 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
 
         run_method_data_sending_code.beginControlFlow("do");
 
-
+        run_method_data_sending_code.addStatement("// send database data");
         for(MethodSpec temp_data_method: dbMethodsList)
         {
             run_method_data_sending_code.addStatement("$L($L)", temp_data_method.name, sim_model_var_name);
         }
+        run_method_data_sending_code.addStatement("// send charting data");
+        run_method_data_sending_code.addStatement("$L($L)", chartMethod.name, sim_model_var_name);
+        run_method_data_sending_code.addStatement("// send visualization data");
         run_method_data_sending_code.addStatement("$T $L = $L.schedule.step($L)", boolean.class, sim_is_step_var_name, sim_model_var_name, sim_model_var_name);
         run_method_data_sending_code.addStatement("if (!$L) break", sim_is_step_var_name);
 
