@@ -71,7 +71,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         set.add(SimAgent.class.getName());
         set.add(SimDB.class.getName());
         set.add(SimChart.class.getName());
-        set.add(SimVisual.class.getName());
+        set.add(SimModelVisual.class.getName());
         set.add(SimField.class.getName());
         set.add(SimParam.class.getName());
 
@@ -116,10 +116,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
             generateChartMethod(roundEnv);
 
             // process visual
-            // visualMethod =
-
-            // process model parameters
-            // paramsCodeblock =
+            generateVisualMethod(roundEnv);
 
             // generate code
             generateSimLauncherCode();
@@ -240,7 +237,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
 
         // Extract Visualizing annotation data
         visualDTO = new VisualDTO();
-        Set<? extends Element> visualElementSet = roundEnv.getElementsAnnotatedWith(SimVisual.class);
+        Set<? extends Element> visualElementSet = roundEnv.getElementsAnnotatedWith(SimModelVisual.class);
         // the usage of the SimModel annotation should be only one
         if(visualElementSet.size() <= 1)
         {
@@ -254,7 +251,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
             // get the Agent UI method name
             String agentMethodName = agentType.getEnclosedElements().stream()
                     .filter(x -> x.getKind() == ElementKind.METHOD)
-                    .filter(x -> x.getAnnotation(SimAgentUI.class) != null)
+                    .filter(x -> x.getAnnotation(SimAgentVisual.class) != null)
                     .map(x -> {
                         return x.getSimpleName().toString();
                     })
@@ -437,6 +434,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
                 .addMethods(agentDataMethodsList)
                 .addMethods(dbMethodsList)
                 .addMethod(chartMethod)
+                .addMethod(visualMethod)
                 .build();
 
         try
@@ -499,6 +497,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         run_method_data_sending_code.addStatement("// send charting data");
         run_method_data_sending_code.addStatement("$L($L)", chartMethod.name, sim_model_var_name);
         run_method_data_sending_code.addStatement("// send visualization data");
+        run_method_data_sending_code.addStatement("$L($L)", visualMethod.name, sim_model_var_name);
         run_method_data_sending_code.addStatement("$T $L = $L.schedule.step($L)", boolean.class, sim_is_step_var_name, sim_model_var_name, sim_model_var_name);
         run_method_data_sending_code.addStatement("if (!$L) break", sim_is_step_var_name);
 
@@ -589,6 +588,22 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
 
         return main_method_code.build();
 
+    }
+
+    private boolean generateVisualMethod(RoundEnvironment roundEnv)
+    {
+        String send_visual_data_method_name = "sendVisualData";
+        MethodSpec.Builder tempSendVisualMethod = MethodSpec.methodBuilder(send_visual_data_method_name)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(modelDTO.getClassName(), "model");
+        tempSendVisualMethod.beginControlFlow("for ($T temp_agt: model.$L())", visualDTO.getBoundedAgentName(), visualDTO.getModelMethodName());
+        tempSendVisualMethod.addStatement("$L.send(\"visuals\", \"ui_token_here\", temp_agt.$L())",
+                kafka_template_field_name,
+                visualDTO.getAgentMethodName());
+        tempSendVisualMethod.endControlFlow();
+        visualMethod = tempSendVisualMethod.build();
+
+        return true;
     }
 
 }

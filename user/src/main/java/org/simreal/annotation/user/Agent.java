@@ -1,11 +1,11 @@
 package org.simreal.annotation.user;
 
+import com.example.application.sim_ui.SimUI;
 import lombok.Getter;
 import lombok.Setter;
 import org.simreal.annotation.SimAgent;
-import org.simreal.annotation.SimAgentUI;
+import org.simreal.annotation.SimAgentVisual;
 import org.simreal.annotation.SimField;
-import org.simreal.annotation.SimModel;
 
 @Getter
 @Setter
@@ -22,10 +22,10 @@ public class Agent {
 
     }
 
-    @SimAgentUI
+    @SimAgentVisual
     // update the return type to SimUI in the future
-    public void agentUI()
+    public SimUI agentUI()
     {
-        return;
+        return null;
     }
 }

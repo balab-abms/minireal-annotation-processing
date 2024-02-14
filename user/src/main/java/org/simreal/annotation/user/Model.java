@@ -1,7 +1,6 @@
 package org.simreal.annotation.user;
 
 import org.simreal.annotation.*;
-import org.simreal.processor.DTO.ModelDTO;
 import sim.engine.SimState;
 
 import java.util.ArrayList;
@@ -38,7 +37,7 @@ public class Model extends SimState {
         return 0;
     }
 
-    @SimVisual
+    @SimModelVisual
     public ArrayList<Agent> toVisual(){
         return null;
     }
