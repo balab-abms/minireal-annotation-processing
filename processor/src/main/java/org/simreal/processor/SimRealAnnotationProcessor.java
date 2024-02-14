@@ -270,7 +270,7 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         metaModelDTO.setChartDTOList(chartDTOList);
         metaModelDTO.setVisualDTO(visualDTO);
 
-        FileObject object = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT,"","metaModel.json");
+        FileObject object = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT,"","metaData.json");
         Writer writer = object.openWriter();
         gson.toJson(metaModelDTO, writer);
         writer.close();
@@ -596,9 +596,11 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         MethodSpec.Builder tempSendVisualMethod = MethodSpec.methodBuilder(send_visual_data_method_name)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(modelDTO.getClassName(), "model");
+        tempSendVisualMethod.addStatement("int agents_popln = model.$L().size()", visualDTO.getModelMethodName());
         tempSendVisualMethod.beginControlFlow("for ($T temp_agt: model.$L())", visualDTO.getBoundedAgentName(), visualDTO.getModelMethodName());
-        tempSendVisualMethod.addStatement("$L.send(\"visuals\", \"ui_token_here\", temp_agt.$L())",
+        tempSendVisualMethod.addStatement("$L.send(\"visuals\", $L.valueOf(agents_popln), temp_agt.$L())",
                 kafka_template_field_name,
+                String.class.getSimpleName(),
                 visualDTO.getAgentMethodName());
         tempSendVisualMethod.endControlFlow();
         visualMethod = tempSendVisualMethod.build();
