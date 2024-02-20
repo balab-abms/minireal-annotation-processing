@@ -488,7 +488,10 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         );
 
         run_method_data_sending_code.beginControlFlow("do");
-
+        run_method_data_sending_code.addStatement("$L.send(\"tick\", \"$L\", $L.schedule.getSteps())",
+                kafka_template_field_name,
+                "ui_token",
+                "model");
         run_method_data_sending_code.addStatement("// send database data");
         for(MethodSpec temp_data_method: dbMethodsList)
         {
