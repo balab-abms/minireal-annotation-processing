@@ -1,6 +1,5 @@
 package org.simreal.annotation.user;
 
-import com.example.application.sim_ui.SimUI;
 import lombok.Getter;
 import lombok.Setter;
 import org.simreal.annotation.SimAgent;
@@ -24,7 +23,7 @@ public class Agent {
 
     @SimAgentVisual
     // update the return type to SimUI in the future
-    public SimUI agentUI()
+    public String agentUI()
     {
         return null;
     }
