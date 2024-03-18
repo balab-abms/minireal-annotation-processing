@@ -7,7 +7,6 @@ public class MetaModelDTO {
     public ArrayList<ParamDTO> paramDTOList;
     public ArrayList<DatabaseDTO> dbDTOList;
     public ArrayList<ChartDTO> chartDTOList;
-    public VisualDTO visualDTO;
 
     public ModelDTO getModelDTO() {
         return modelDTO;
@@ -41,11 +40,4 @@ public class MetaModelDTO {
         this.chartDTOList = chartDTOList;
     }
 
-    public VisualDTO getVisualDTO() {
-        return visualDTO;
-    }
-
-    public void setVisualDTO(VisualDTO visualDTO) {
-        this.visualDTO = visualDTO;
-    }
 }

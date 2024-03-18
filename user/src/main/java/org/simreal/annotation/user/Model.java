@@ -36,9 +36,4 @@ public class Model extends SimState {
     public double toAvgChart(){
         return 0;
     }
-
-    @SimModelVisual
-    public ArrayList<Agent> toVisual(){
-        return null;
-    }
 }

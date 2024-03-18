@@ -3,7 +3,6 @@ package org.simreal.annotation.user;
 import lombok.Getter;
 import lombok.Setter;
 import org.simreal.annotation.SimAgent;
-import org.simreal.annotation.SimAgentVisual;
 import org.simreal.annotation.SimField;
 
 @Getter
@@ -19,12 +18,5 @@ public class Agent {
     public Agent(){
         // set the step at each tick
 
-    }
-
-    @SimAgentVisual
-    // update the return type to SimUI in the future
-    public String agentUI()
-    {
-        return null;
     }
 }
