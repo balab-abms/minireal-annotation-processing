@@ -1,5 +1,6 @@
 package org.simreal.processor;
 
+import org.simreal.annotation.*;
 import com.example.application.kafkaserialize.KafkaTemplateSerializer;
 import com.google.auto.service.AutoService;
 import com.google.gson.Gson;
@@ -7,7 +8,6 @@ import com.google.gson.reflect.TypeToken;
 import com.squareup.javapoet.*;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.simreal.annotation.*;
 import org.simreal.processor.DTO.*;
 import org.springframework.kafka.core.KafkaTemplate;
 

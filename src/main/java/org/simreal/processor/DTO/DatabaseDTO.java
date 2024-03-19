@@ -1,7 +1,6 @@
 package org.simreal.processor.DTO;
 
 import com.squareup.javapoet.ClassName;
-import org.simreal.annotation.SimField;
 
 import java.util.List;
 
