@@ -59,8 +59,8 @@ publishing {
             name = "GitHubPackages" //  optional target repository name
             url = uri("https://maven.pkg.github.com/panderior/minireal-annotation-processor")
             credentials {
-                username = System.getenv('GIT_USERNAME') ?: 'defaultUsername'
-                password = System.getenv('GIT_PASSWORD') ?: 'defaultPassword'
+                username = project.findProperty("gpr.user") ?: System.getenv("GIT_USERNAME")
+                password = project.findProperty("gpr.token") ?: System.getenv("GIT_PASSWORD")
             }
         }
     }

@@ -31,7 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @AutoService(Processor.class)
-public class SimRealAnnotationProcessor  extends AbstractProcessor
+public class MiniRealAnnotationProcessor extends AbstractProcessor
 {
     // define memebre variables
     private int round=0;
@@ -166,12 +166,6 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         steps_param.setType("int");
         steps_param.setIsdefault(true);
         paramDTOList.add(steps_param);
-        ParamDTO tick_delay_param = new ParamDTO();
-        tick_delay_param.setName("tick_delay");
-        tick_delay_param.setValue("100");
-        tick_delay_param.setType("int");
-        tick_delay_param.setIsdefault(true);
-        paramDTOList.add(tick_delay_param);
 
         System.out.println(gson.toJson(paramDTOList,ArrayList.class));
 
@@ -441,9 +435,9 @@ public class SimRealAnnotationProcessor  extends AbstractProcessor
         }
         run_method_data_sending_code.addStatement("// send charting data");
         run_method_data_sending_code.addStatement("$L($L)", chartMethod.name, sim_model_var_name);
-
+        String tick_delay_value = "250";
         run_method_data_sending_code.beginControlFlow("try");
-        run_method_data_sending_code.addStatement("$T.sleep($L)", Thread.class, "tick_delay");
+        run_method_data_sending_code.addStatement("$T.sleep($L)", Thread.class, tick_delay_value);
         run_method_data_sending_code.nextControlFlow("catch($T e)", InterruptedException.class);
         run_method_data_sending_code.addStatement("throw new $T(e)", RuntimeException.class);
         run_method_data_sending_code.endControlFlow();
