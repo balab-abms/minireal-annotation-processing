@@ -1,10 +1,12 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'signing'
 }
 
-group = 'org.simreal.annotaton'
-version = '1.0'
+group = 'org.simreal.annotaion'
+archivesBaseName = "minireal-annotation"
+version = '1.0.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -38,33 +40,97 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
 tasks.withType(JavaCompile){
     options.encoding = "UTF-8"
-
 }
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
 
 // MAVEN !
 publish {
     dependsOn build
 }
 
-publishing {
-    publications {
-        myLib(MavenPublication) {
-            from components.java
-        }
-    }
+//publishing {
+//    publications {
+//        myLib(MavenPublication) {
+//            from components.java
+//        }
+//    }
+//    repositories {
+//        maven {
+//            name = "GitHubPackages" //  optional target repository name
+//            url = uri("https://maven.pkg.github.com/panderior/minireal-annotation-processor")
+//            credentials {
+//                username = System.getProperty('ossrhUsername')
+//                password = System.getProperty('ossrhPassword')
+//            }
+//        }
+//    }
+//}
+
+uploadArchives {
     repositories {
-        maven {
-            name = "GitHubPackages" //  optional target repository name
-            url = uri("https://maven.pkg.github.com/panderior/minireal-annotation-processor")
-            credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GIT_USERNAME")
-                password = project.findProperty("gpr.token") ?: System.getenv("GIT_PASSWORD")
+        mavenDeployer {
+            beforeDeployment { MavenArtifact artifact -> signing.signPom(artifact) }
+
+            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: System.getProperty('ossrhUsername'), password: System.getProperty('ossrhPassword'))
+            }
+
+            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: System.getProperty('ossrhUsername'), password: System.getProperty('ossrhPassword'))
+            }
+
+            pom.project {
+                name 'Example Application'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description 'A application used as an example on how to set up pushing  its components to the Central Repository.'
+                url 'http://www.example.com/example-application'
+
+                scm {
+                    connection 'scm:svn:http://foo.googlecode.com/svn/trunk/'
+                    developerConnection 'scm:svn:https://foo.googlecode.com/svn/trunk/'
+                    url 'http://foo.googlecode.com/svn/trunk/'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'manfred'
+                        name 'Manfred Moser'
+                        email 'manfred@sonatype.com'
+                    }
+                }
             }
         }
     }
 }
+
+signing {
+    sign configurations.archives
+}
+
 
 
 test {
