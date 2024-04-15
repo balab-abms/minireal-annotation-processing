@@ -30,10 +30,14 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * This class is an annotation processor that uses the DTOs and annotations.
+ * It extends the AbstractProcessor class and is used to process annotations at compile time.
+ */
 @AutoService(Processor.class)
 public class MiniRealAnnotationProcessor extends AbstractProcessor
 {
-    // define memebre variables
+    // Member variables
     private int round=0;
     private ModelDTO modelDTO;
     private ArrayList<ParamDTO> paramDTOList;
@@ -41,7 +45,7 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
     private ArrayList<ChartDTO> chartDTOList;
 
 
-    // define generated simulation launcher methods related variables
+    // Variables related to generated simulation launcher methods
     private ArrayList<MethodSpec> dbMethodsList;
     private MethodSpec chartMethod, kafkaSenderMethod;
     private CodeBlock paramsCodeblock;
@@ -55,15 +59,25 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
     String sim_launcher_class_name = "SimulationLauncher";
     String simSession_param_name = "sim_session_token";
 
-    // define annotation processing related variables
+    // Variables related to annotation processing
     private ProcessingEnvironment processingEnv;
 
+
+    /**
+     * Initializes the processor with the processing environment.
+     * @param processingEnv the processing environment
+     */
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         this.processingEnv = processingEnv;
     }
 
+
+    /**
+     * Returns the names of the annotation types supported by this processor.
+     * @return a set of annotation type names
+     */
     @Override
     public Set<String> getSupportedAnnotationTypes()
     {
@@ -78,12 +92,22 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
         return set;
     }
 
+    /**
+     * Returns the latest source version that this processor supports.
+     * @return the latest source version
+     */
     @Override
     public SourceVersion getSupportedSourceVersion()
     {
         return SourceVersion.latestSupported();
     }
 
+    /**
+     * Processes a set of annotation types on type elements originating from the prior round and returns whether or not these annotation types are claimed by this processor.
+     * @param annotations the annotation types
+     * @param roundEnv the environment for information about the current and prior round
+     * @return whether or not the annotation types are claimed by this processor
+     */
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         // initialize types map
@@ -126,6 +150,13 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
         return true;
     }
 
+    /**
+     * Extracts model annotation data and generates meta-information about the model.
+     * @param roundEnv the environment for information about the current and prior round
+     * @return true if the operation is successful, false otherwise
+     * @throws Exception if an error occurs during the operation
+     * @throws IllegalArgumentException if the arguments are not valid
+     */
     public boolean makeModelMetaInfo(RoundEnvironment roundEnv) throws Exception, IllegalArgumentException
     {
         Gson gson = new Gson();
@@ -246,6 +277,13 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
         return true;
     }
 
+    /**
+     * This method generates the database method for the simulation.
+     * It takes a RoundEnvironment object as an argument and returns a boolean indicating the success of the operation.
+     *
+     * @param roundEnv The round environment currently being processed.
+     * @return A boolean indicating the success of the operation.
+     */
     public boolean generateDBMethod(RoundEnvironment roundEnv)
     {
         // String send_agt_data_method_name = String.format("%sSendData", dbDTO.getBoundedAgentName().simpleName().toString());
@@ -322,6 +360,13 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
         return true;
     }
 
+    /**
+     * This method generates the chart method for the simulation.
+     * It takes a RoundEnvironment object as an argument and returns a boolean indicating the success of the operation.
+     *
+     * @param roundEnv The round environment currently being processed.
+     * @return A boolean indicating the success of the operation.
+     */
     public boolean generateChartMethod(RoundEnvironment roundEnv)
     {
         MethodSpec.Builder temp_chart_method = MethodSpec.methodBuilder("sendChartingData")
@@ -341,6 +386,13 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
         return true;
     }
 
+    /**
+     * This method generates the Kafka sender method for the simulation.
+     * It takes a RoundEnvironment object as an argument and returns a boolean indicating the success of the operation.
+     *
+     * @param roundEnv The round environment currently being processed.
+     * @return A boolean indicating the success of the operation.
+     */
     public boolean generateKafkaSenderMethod(RoundEnvironment roundEnv)
     {
         // define field, parameter, method name variables
@@ -384,7 +436,12 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
         return true;
     }
 
-    // a helper methods to generate different code parts of the run method and main method
+    /**
+     * This is a helper method to generate different code parts of the run method.
+     * It returns a CodeBlock object.
+     *
+     * @return A CodeBlock object containing the generated code.
+     */
     private CodeBlock generateSimParamsRunMethodCode()
     {
         CodeBlock.Builder run_method_sim_params_code = CodeBlock.builder();
@@ -405,6 +462,12 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
         return run_method_sim_params_code.build();
     }
 
+    /**
+     * This is a helper method to generate different code parts of the run method.
+     * It returns a CodeBlock object.
+     *
+     * @return A CodeBlock object containing the generated code.
+     */
     private CodeBlock generateDataSendingRunMethodCode()
     {
         ArrayList<String> models_args_list = new ArrayList<>();
@@ -448,6 +511,12 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
         return run_method_data_sending_code.build();
     }
 
+    /**
+     * This is a helper method to generate the main method code.
+     * It returns a CodeBlock object.
+     *
+     * @return A CodeBlock object containing the generated code.
+     */
     private CodeBlock generateMainMethodCode()
     {
         // define used var names
@@ -526,6 +595,15 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
 
     }
 
+    /**
+     * This method generates the simulation launcher code for the simulation.
+     * It defines the Kafka template parametrized type, the member variables for the simulation launcher class,
+     * the simulation launcher constructor, the run method, and the main method.
+     * It also builds the simulation launcher class and writes it to the file.
+     *
+     * @return A boolean indicating the success of the operation. If the operation is successful, it returns true.
+     * If there is an IOException during the operation, it prints an error message and throws a RuntimeException.
+     */
     public boolean generateSimLauncherCode()
     {
         // define Kafka template parametrized type

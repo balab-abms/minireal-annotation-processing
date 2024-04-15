@@ -1,10 +1,11 @@
 plugins {
     id 'java'
+    id 'java-library'
     id 'maven-publish'
     id 'signing'
 }
 
-group = 'org.simreal.annotaion'
+group = 'io.github.panderior'
 archivesBaseName = "minireal-annotation"
 version = '1.0.0-SNAPSHOT'
 
@@ -28,9 +29,6 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
-
-//    implementation files('libs/mason.20.jar')
-
 }
 
 jar {
@@ -40,98 +38,77 @@ jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
 tasks.withType(JavaCompile){
     options.encoding = "UTF-8"
 }
 
-artifacts {
-    archives javadocJar, sourcesJar
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
-
-// MAVEN !
 publish {
     dependsOn build
 }
 
-//publishing {
-//    publications {
-//        myLib(MavenPublication) {
-//            from components.java
-//        }
-//    }
-//    repositories {
-//        maven {
-//            name = "GitHubPackages" //  optional target repository name
-//            url = uri("https://maven.pkg.github.com/panderior/minireal-annotation-processor")
-//            credentials {
-//                username = System.getProperty('ossrhUsername')
-//                password = System.getProperty('ossrhPassword')
-//            }
-//        }
-//    }
-//}
+publishing {
+    publications{
+        mavenJava(MavenPublication){
+            groupId = 'io.github.panderior'
+            artifactId = 'minireal-annotation'
+            version = '1.1.1'
+            from components.java
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenArtifact artifact -> signing.signPom(artifact) }
-
-            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: System.getProperty('ossrhUsername'), password: System.getProperty('ossrhPassword'))
-            }
-
-            snapshotRepository(url: "https://s01.oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: System.getProperty('ossrhUsername'), password: System.getProperty('ossrhPassword'))
-            }
-
-            pom.project {
-                name 'Example Application'
-                packaging 'jar'
-                // optionally artifactId can be defined here
-                description 'A application used as an example on how to set up pushing  its components to the Central Repository.'
-                url 'http://www.example.com/example-application'
-
-                scm {
-                    connection 'scm:svn:http://foo.googlecode.com/svn/trunk/'
-                    developerConnection 'scm:svn:https://foo.googlecode.com/svn/trunk/'
-                    url 'http://foo.googlecode.com/svn/trunk/'
-                }
+            pom {
+                name = 'MiniReal-Annotation '
+                description = 'MiniReal-Annotation is a library that houses java annotations and the process to generate the Simulator class for the MiniReal Webservice which is used for distributed Agent Based Modeling Simulation (ABMS).'
+                url = 'https://github.com/balab-abms/minireal-annotation-processing'
+                inceptionYear = '2024'
 
                 licenses {
                     license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
-
                 developers {
                     developer {
-                        id 'manfred'
-                        name 'Manfred Moser'
-                        email 'manfred@sonatype.com'
+                        id = 'duguma'
+                        name = 'Duguma Yeshitla'
+                        email = 'dugyeshihm@gmail.com'
                     }
                 }
+                scm {
+                    connection = 'scm:git:git:github.com/balab-abms/minireal-annotation-processing.git'
+                    developerConnection = 'scm:git:ssh://github.com/balab-abms/minireal-annotation-processing.git'
+                    url = 'https://github.com/balab-abms/minireal-annotation-processing'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = System.getProperty('ossrhUsername')
+                password = System.getProperty('ossrhPassword')
             }
         }
     }
 }
 
 signing {
-    sign configurations.archives
+    useGpgCmd()
+    sign publishing.publications.mavenJava
 }
 
-
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
 
 test {
     useJUnitPlatform()
