@@ -58,6 +58,7 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
     String sim_is_step_var_name = "is_step";
     String sim_launcher_class_name = "SimulationLauncher";
     String simSession_param_name = "sim_session_token";
+    String tick_var_name = "tick";
 
     // Variables related to annotation processing
     private ProcessingEnvironment processingEnv;
@@ -345,8 +346,9 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
             // loop through db agent method and send data to kafka
             CodeBlock.Builder send_agt_data_code = CodeBlock.builder();
             send_agt_data_code.beginControlFlow("for ($T temp_agt: model.$L())", dbDTO.getBoundedAgentName(), dbDTO.getMethodName());
-            send_agt_data_code.addStatement("$L(\"db\", \"$L\", $N($L, temp_agt))",
+            send_agt_data_code.addStatement("$L($L, \"db\", \"$L\", $N($L, temp_agt))",
                     kafkaSenderMethod.name,
+                    sim_model_var_name,
                     dbDTO.getTableName(),
                     getAgentDataMethod,
                     sim_model_var_name);
@@ -371,12 +373,13 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
     {
         MethodSpec.Builder temp_chart_method = MethodSpec.methodBuilder("sendChartingData")
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(modelDTO.getClassName(), "model")
+                .addParameter(modelDTO.getClassName(), sim_model_var_name)
                 .returns(void.class);
         for(ChartDTO temp_chart_dto: chartDTOList)
         {
-            temp_chart_method.addStatement("$L(\"chart\", \"$L\", $L.$L())",
+            temp_chart_method.addStatement("$L($L, \"chart\", \"$L\", $L.$L())",
                     kafkaSenderMethod.name,
+                    sim_model_var_name,
                     temp_chart_dto.chartName,
                     sim_model_var_name,
                     temp_chart_dto.methodName);
@@ -404,6 +407,7 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
 
         MethodSpec.Builder tempKafkaSenderMethod = MethodSpec.methodBuilder(send_kafka_sender_method_name)
                 .addModifiers(Modifier.PUBLIC)
+                .addParameter(modelDTO.getClassName(), sim_model_var_name)
                 .addParameter(String.class, topic_param_name)
                 .addParameter(String.class, key_param_name)
                 .addParameter(Object.class, value_param_name);
@@ -419,6 +423,11 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
                 key_param_name,
                 value_param_name);
         tempKafkaSenderMethod.addComment("Add headers");
+        tempKafkaSenderMethod.addStatement("$L.headers().add(new $T(\"$L\", $L.schedule.getSteps().getBytes()))",
+                kafka_record_field_name,
+                RecordHeader.class,
+                tick_var_name,
+                sim_model_var_name);
         tempKafkaSenderMethod.addStatement("$L.headers().add(new $T(\"$L\", $L.getBytes()))",
                 kafka_record_field_name,
                 RecordHeader.class,
@@ -487,10 +496,7 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
         run_method_data_sending_code.beginControlFlow("do");
         run_method_data_sending_code.addStatement("$T $L = $L.schedule.step($L)", boolean.class, sim_is_step_var_name, sim_model_var_name, sim_model_var_name);
         run_method_data_sending_code.addStatement("if (!$L) break", sim_is_step_var_name);
-        run_method_data_sending_code.addStatement("$L(\"tick\", \"$L\", $L.schedule.getSteps())",
-                kafkaSenderMethod.name,
-                "",
-                "model");
+        run_method_data_sending_code.addStatement("$L.send($L, $L.schedule.getSteps())", kafka_template_field_name, tick_var_name, sim_model_var_name);
         run_method_data_sending_code.addStatement("// send database data");
         for(MethodSpec temp_data_method: dbMethodsList)
         {
