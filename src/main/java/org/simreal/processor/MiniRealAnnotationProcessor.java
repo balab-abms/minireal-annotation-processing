@@ -423,10 +423,11 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
                 key_param_name,
                 value_param_name);
         tempKafkaSenderMethod.addComment("Add headers");
-        tempKafkaSenderMethod.addStatement("$L.headers().add(new $T(\"$L\", $L.schedule.getSteps().getBytes()))",
+        tempKafkaSenderMethod.addStatement("$L.headers().add(new $T(\"$L\", $T.valueOf($L.schedule.getSteps()).getBytes()))",
                 kafka_record_field_name,
                 RecordHeader.class,
                 tick_var_name,
+                String.class,
                 sim_model_var_name);
         tempKafkaSenderMethod.addStatement("$L.headers().add(new $T(\"$L\", $L.getBytes()))",
                 kafka_record_field_name,
@@ -496,7 +497,7 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
         run_method_data_sending_code.beginControlFlow("do");
         run_method_data_sending_code.addStatement("$T $L = $L.schedule.step($L)", boolean.class, sim_is_step_var_name, sim_model_var_name, sim_model_var_name);
         run_method_data_sending_code.addStatement("if (!$L) break", sim_is_step_var_name);
-        run_method_data_sending_code.addStatement("$L.send($L, $L.schedule.getSteps())", kafka_template_field_name, tick_var_name, sim_model_var_name);
+        run_method_data_sending_code.addStatement("$L.send(\"$L\", $L.schedule.getSteps())", kafka_template_field_name, tick_var_name, sim_model_var_name);
         run_method_data_sending_code.addStatement("// send database data");
         for(MethodSpec temp_data_method: dbMethodsList)
         {
