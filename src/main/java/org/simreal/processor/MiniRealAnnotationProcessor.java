@@ -497,7 +497,7 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
         run_method_data_sending_code.beginControlFlow("do");
         run_method_data_sending_code.addStatement("$T $L = $L.schedule.step($L)", boolean.class, sim_is_step_var_name, sim_model_var_name, sim_model_var_name);
         run_method_data_sending_code.addStatement("if (!$L) break", sim_is_step_var_name);
-        run_method_data_sending_code.addStatement("$L.send(\"$L\", $L.schedule.getSteps())", kafka_template_field_name, tick_var_name, sim_model_var_name);
+        run_method_data_sending_code.addStatement("$L.send($L, $L.schedule.getSteps())", kafka_template_field_name, String.format("\"%s\" + %s", tick_var_name, simSession_param_name), sim_model_var_name);
         run_method_data_sending_code.addStatement("// send database data");
         for(MethodSpec temp_data_method: dbMethodsList)
         {
