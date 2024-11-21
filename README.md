@@ -2,7 +2,7 @@
 
 ## Background on Anntation Processing
 ### Introduction
-Annotation processing plays a key role in the utilization of the MiniReal system.
+Annotation processing plays a key role in the utilization of the [MiniReal system](https://github.com/balab-abms/minireal).
 It helps to generate the `Simulation Launcher` class when the project is compiled
 based on the respective simulation code implementation of the User. This class is:
 
