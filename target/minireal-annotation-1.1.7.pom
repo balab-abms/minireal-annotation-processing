@@ -7,7 +7,9 @@
   <artifactId>minireal-annotation</artifactId>
   <version>1.1.7</version>
 
-  <name>minireal-annotation</name>
+  <name>MiniReal-Annotation</name>
+  <description>MiniReal-Annotation is a library that houses java annotations and the process to generate the Simulator
+      class for the MiniReal Webservice which is used for distributed Agent-Based Modeling Simulation (ABMS).</description>
   <url>https://minireal-doc.pazd.org/</url>
 
   <licenses>
@@ -23,6 +25,12 @@
       <email>dugyeshihm@gmail.com</email>
     </developer>
   </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/balab-abms/minireal-annotation-processing</connection>
+    <developerConnection>scm:git:ssh://git@github.com:balab-abms/minireal-annotation-processing.git</developerConnection>
+    <url>https://github.com/balab-abms/minireal-annotation-processing/tree/master</url>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -42,21 +50,10 @@
   </dependencyManagement>
 
   <dependencies>
-<!--    <dependency>-->
-<!--      <groupId>org.junit.jupiter</groupId>-->
-<!--      <artifactId>junit-jupiter-api</artifactId>-->
-<!--      <scope>test</scope>-->
-<!--    </dependency>-->
-<!--    &lt;!&ndash; Optionally: parameterized tests support &ndash;&gt;-->
-<!--    <dependency>-->
-<!--      <groupId>org.junit.jupiter</groupId>-->
-<!--      <artifactId>junit-jupiter-params</artifactId>-->
-<!--      <scope>test</scope>-->
-<!--    </dependency>-->
-
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <version>5.9.1</version>
       <scope>test</scope>
     </dependency>
 
@@ -101,8 +98,8 @@
       <groupId>com.example.libs</groupId>
       <artifactId>mason</artifactId>
       <version>20</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/libs/mason.20.jar</systemPath>
+<!--      <scope>system</scope>-->
+<!--      <systemPath>${project.basedir}/libs/mason.20.jar</systemPath>-->
     </dependency>
 
     <!-- Annotation processors and compile-only libs -->
