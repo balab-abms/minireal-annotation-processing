@@ -58,6 +58,7 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
     String sim_is_step_var_name = "is_step";
     String sim_launcher_class_name = "SimulationLauncher";
     String simSession_param_name = "sim_session_token";
+    String batch_comb_name = "batch_comb_name";
     String tick_var_name = "tick";
 
     // Variables related to annotation processing
@@ -377,10 +378,11 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
                 .returns(void.class);
         for(ChartDTO temp_chart_dto: chartDTOList)
         {
-            temp_chart_method.addStatement("$L($L, \"chart\", \"$L\", $L.$L())",
+            String modified_chart_key = String.format("%s + \"%s\"", batch_comb_name, temp_chart_dto.chartName);
+            temp_chart_method.addStatement("$L($L, \"chart\", $L, $L.$L())",
                     kafkaSenderMethod.name,
                     sim_model_var_name,
-                    temp_chart_dto.chartName,
+                    modified_chart_key,
                     sim_model_var_name,
                     temp_chart_dto.methodName);
         }
@@ -485,8 +487,10 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
             if(!temp_param.isdefault)
                 models_args_list.add(temp_param.getName());
         });
+
         String models_args_str = String.join(", ", models_args_list);
         CodeBlock.Builder run_method_data_sending_code = CodeBlock.builder();
+        run_method_data_sending_code.beginControlFlow("try");
         run_method_data_sending_code.addStatement("$T $L = new $T($L)",
                 modelDTO.getClassName(),
                 sim_model_var_name,
@@ -506,14 +510,16 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
         run_method_data_sending_code.addStatement("// send charting data");
         run_method_data_sending_code.addStatement("$L($L)", chartMethod.name, sim_model_var_name);
         String tick_delay_value = "250";
-        run_method_data_sending_code.beginControlFlow("try");
+//        run_method_data_sending_code.beginControlFlow("try");
         run_method_data_sending_code.addStatement("$T.sleep($L)", Thread.class, tick_delay_value);
-        run_method_data_sending_code.nextControlFlow("catch($T e)", InterruptedException.class);
-        run_method_data_sending_code.addStatement("throw new $T(e)", RuntimeException.class);
-        run_method_data_sending_code.endControlFlow();
 
         run_method_data_sending_code.endControlFlow();
         run_method_data_sending_code.addStatement("while ($L.schedule.getSteps() < steps)", sim_model_var_name);
+        run_method_data_sending_code.nextControlFlow("catch($T e)", Exception.class);
+//        run_method_data_sending_code.addStatement("throw new $T(e)", RuntimeException.class);
+        run_method_data_sending_code.addStatement("e.printStackTrace()", RuntimeException.class);
+        run_method_data_sending_code.addStatement("System.exit(1)", RuntimeException.class);
+        run_method_data_sending_code.endControlFlow();
 
         return run_method_data_sending_code.build();
     }
@@ -578,16 +584,19 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
                 hash_type_name,
                 HashMap.class);
         main_method_code.addStatement("System.out.println($L.toString())", model_params_deserialized_name);
-        main_method_code.addStatement("// get user id");
+        main_method_code.addStatement("// get user simulation session id");
         main_method_code.addStatement("$T $L = args.length > 2 ? args[2] : \"0\"", String.class, simSession_param_name);
+        main_method_code.addStatement("// get batch combination name");
+        main_method_code.addStatement("$T $L = args.length > 3 ? args[3] + \"_\" : \"\"", String.class, batch_comb_name);
         main_method_code.addStatement("// run simulation");
-        main_method_code.addStatement("$T $L = new $L($L, $L, $L)",
+        main_method_code.addStatement("$T $L = new $L($L, $L, $L, $L)",
                 Runnable.class,
                 runnable_model_obj_name,
                 sim_launcher_class_name,
                 kafka_template_deserialized_name,
                 model_params_deserialized_name,
-                simSession_param_name);
+                simSession_param_name,
+                batch_comb_name);
         main_method_code.addStatement("$T $L = new $T($L)",
                 Thread.class,
                 model_thread_name,
@@ -595,7 +604,9 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
                 runnable_model_obj_name);
         main_method_code.addStatement("$L.start()", model_thread_name);
         main_method_code.nextControlFlow("catch($T | $T e)", IOException.class, ClassNotFoundException.class);
-        main_method_code.addStatement("throw new $T(e)", RuntimeException.class);
+//        main_method_code.addStatement("throw new $T(e)", RuntimeException.class);
+        main_method_code.addStatement("e.printStackTrace()", RuntimeException.class);
+        main_method_code.addStatement("System.exit(1)", RuntimeException.class);
         main_method_code.endControlFlow();
 
         return main_method_code.build();
@@ -639,9 +650,11 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
                 .addParameter(kafka_template_type, kafka_template_field_name)
                 .addParameter(sim_params_map_type, sim_param_field_name)
                 .addParameter(String.class, simSession_param_name)
+                .addParameter(String.class, batch_comb_name)
                 .addStatement("this.$L = $L", kafka_template_field_name, kafka_template_field_name)
                 .addStatement("this.$L = $L", sim_param_field_name, sim_param_field_name)
                 .addStatement("this.$L = $L", simSession_param_name, simSession_param_name)
+                .addStatement("this.$L = $L", batch_comb_name, batch_comb_name)
                 .build();
         // define run method
         MethodSpec runMethod = MethodSpec.methodBuilder("run")
@@ -667,6 +680,7 @@ public class MiniRealAnnotationProcessor extends AbstractProcessor
                 .addField(kafka_template_field)
                 .addField(sim_params_field)
                 .addField(String.class, simSession_param_name, Modifier.PRIVATE)
+                .addField(String.class, batch_comb_name, Modifier.PRIVATE)
                 .addMethod(simConstructor)
                 .addMethod(runMethod)
                 .addMethod(mainMethod)

@@ -1,0 +1,4 @@
+com.example.application.kafkaserialize
+org.simreal.annotation
+org.simreal.processor
+org.simreal.processor.DTO

@@ -1,0 +1,15 @@
+org/simreal/processor/DTO/MetaModelDTO.class
+com/example/application/kafkaserialize/KafkaTemplateSerializer.class
+org/simreal/annotation/SimDB.class
+org/simreal/processor/DTO/FieldDTO.class
+org/simreal/annotation/SimField.class
+org/simreal/processor/MiniRealAnnotationProcessor.class
+org/simreal/processor/DTO/ChartDTO.class
+org/simreal/processor/DTO/DatabaseDTO.class
+org/simreal/annotation/SimParam.class
+org/simreal/processor/DTO/ModelDTO.class
+org/simreal/processor/DTO/ParamDTO.class
+org/simreal/annotation/SimAgent.class
+org/simreal/annotation/SimModel.class
+META-INF/services/javax.annotation.processing.Processor
+org/simreal/annotation/SimChart.class
