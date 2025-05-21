@@ -1,7 +1,7 @@
 @options
 @packages
 -classpath
-'/home/dobrilla/.m2/repository/com/squareup/javapoet/1.11.1/javapoet-1.11.1.jar:/home/dobrilla/.m2/repository/org/apache/commons/commons-lang3/3.9/commons-lang3-3.9.jar:/home/dobrilla/.m2/repository/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar:/home/dobrilla/.m2/repository/junit/junit/4.10/junit-4.10.jar:/home/dobrilla/.m2/repository/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar:/home/dobrilla/.m2/repository/com/google/code/gson/gson/2.9.1/gson-2.9.1.jar:/home/dobrilla/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.13.1/jackson-databind-2.13.1.jar:/home/dobrilla/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.13.1/jackson-annotations-2.13.1.jar:/home/dobrilla/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.13.1/jackson-core-2.13.1.jar:/home/dobrilla/.m2/repository/org/springframework/kafka/spring-kafka/2.8.0/spring-kafka-2.8.0.jar:/home/dobrilla/.m2/repository/org/springframework/spring-context/5.3.13/spring-context-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-aop/5.3.13/spring-aop-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-beans/5.3.13/spring-beans-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-core/5.3.13/spring-core-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-jcl/5.3.13/spring-jcl-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-expression/5.3.13/spring-expression-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-messaging/5.3.13/spring-messaging-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-tx/5.3.13/spring-tx-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/retry/spring-retry/1.3.1/spring-retry-1.3.1.jar:/home/dobrilla/.m2/repository/javax/annotation/javax.annotation-api/1.3.2/javax.annotation-api-1.3.2.jar:/home/dobrilla/.m2/repository/org/apache/kafka/kafka-clients/3.0.0/kafka-clients-3.0.0.jar:/home/dobrilla/.m2/repository/com/example/libs/mason/20/mason-20.jar:/home/dobrilla/.m2/repository/com/google/auto/service/auto-service/1.0-rc6/auto-service-1.0-rc6.jar:/home/dobrilla/.m2/repository/com/google/auto/service/auto-service-annotations/1.0-rc6/auto-service-annotations-1.0-rc6.jar:/home/dobrilla/.m2/repository/com/google/auto/auto-common/0.10/auto-common-0.10.jar:/home/dobrilla/.m2/repository/com/google/guava/guava/27.0.1-jre/guava-27.0.1-jre.jar:/home/dobrilla/.m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar:/home/dobrilla/.m2/repository/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/home/dobrilla/.m2/repository/org/checkerframework/checker-qual/2.5.2/checker-qual-2.5.2.jar:/home/dobrilla/.m2/repository/com/google/errorprone/error_prone_annotations/2.2.0/error_prone_annotations-2.2.0.jar:/home/dobrilla/.m2/repository/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar:/home/dobrilla/.m2/repository/org/codehaus/mojo/animal-sniffer-annotations/1.17/animal-sniffer-annotations-1.17.jar:/home/dobrilla/.m2/repository/org/projectlombok/lombok/1.18.22/lombok-1.18.22.jar'
+'/home/dobrilla/.m2/repository/com/squareup/javapoet/1.11.1/javapoet-1.11.1.jar:/home/dobrilla/.m2/repository/org/apache/commons/commons-lang3/3.9/commons-lang3-3.9.jar:/home/dobrilla/.m2/repository/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar:/home/dobrilla/.m2/repository/junit/junit/4.10/junit-4.10.jar:/home/dobrilla/.m2/repository/org/hamcrest/hamcrest-core/1.1/hamcrest-core-1.1.jar:/home/dobrilla/.m2/repository/com/google/code/gson/gson/2.9.1/gson-2.9.1.jar:/home/dobrilla/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.13.1/jackson-databind-2.13.1.jar:/home/dobrilla/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.13.1/jackson-annotations-2.13.1.jar:/home/dobrilla/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.13.1/jackson-core-2.13.1.jar:/home/dobrilla/.m2/repository/org/springframework/kafka/spring-kafka/2.8.0/spring-kafka-2.8.0.jar:/home/dobrilla/.m2/repository/org/springframework/spring-context/5.3.13/spring-context-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-aop/5.3.13/spring-aop-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-beans/5.3.13/spring-beans-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-core/5.3.13/spring-core-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-jcl/5.3.13/spring-jcl-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-expression/5.3.13/spring-expression-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-messaging/5.3.13/spring-messaging-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/spring-tx/5.3.13/spring-tx-5.3.13.jar:/home/dobrilla/.m2/repository/org/springframework/retry/spring-retry/1.3.1/spring-retry-1.3.1.jar:/home/dobrilla/.m2/repository/javax/annotation/javax.annotation-api/1.3.2/javax.annotation-api-1.3.2.jar:/home/dobrilla/.m2/repository/org/apache/kafka/kafka-clients/3.0.0/kafka-clients-3.0.0.jar:/home/dobrilla/.m2/repository/org/pazd/mason/mason/20/mason-20.jar:/home/dobrilla/.m2/repository/java3d/j3d-core/1.3.1/j3d-core-1.3.1.jar:/home/dobrilla/.m2/repository/java3d/vecmath/1.3.1/vecmath-1.3.1.jar:/home/dobrilla/.m2/repository/java3d/j3d-core-utils/1.3.1/j3d-core-utils-1.3.1.jar:/home/dobrilla/.m2/repository/org/beanshell/bsh/2.0b4/bsh-2.0b4.jar:/home/dobrilla/.m2/repository/com/lowagie/itext/1.2.3/itext-1.2.3.jar:/home/dobrilla/.m2/repository/org/jfree/jcommon/1.0.24/jcommon-1.0.24.jar:/home/dobrilla/.m2/repository/org/jfree/jfreechart/1.0.17/jfreechart-1.0.17.jar:/home/dobrilla/.m2/repository/xml-apis/xml-apis/1.3.04/xml-apis-1.3.04.jar:/home/dobrilla/.m2/repository/javax/media/jmf/2.1.1e/jmf-2.1.1e.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all-main/2.3.1/jogl-all-main-2.3.1.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-android-aarch64.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-android-armv6.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-linux-amd64.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-linux-armv6.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-linux-armv6hf.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-linux-i586.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-macosx-universal.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-solaris-amd64.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-solaris-i586.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-windows-amd64.jar:/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-windows-i586.jar:/home/dobrilla/.m2/repository/com/google/auto/service/auto-service/1.0-rc6/auto-service-1.0-rc6.jar:/home/dobrilla/.m2/repository/com/google/auto/service/auto-service-annotations/1.0-rc6/auto-service-annotations-1.0-rc6.jar:/home/dobrilla/.m2/repository/com/google/auto/auto-common/0.10/auto-common-0.10.jar:/home/dobrilla/.m2/repository/com/google/guava/guava/27.0.1-jre/guava-27.0.1-jre.jar:/home/dobrilla/.m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar:/home/dobrilla/.m2/repository/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/home/dobrilla/.m2/repository/org/checkerframework/checker-qual/2.5.2/checker-qual-2.5.2.jar:/home/dobrilla/.m2/repository/com/google/errorprone/error_prone_annotations/2.2.0/error_prone_annotations-2.2.0.jar:/home/dobrilla/.m2/repository/com/google/j2objc/j2objc-annotations/1.1/j2objc-annotations-1.1.jar:/home/dobrilla/.m2/repository/org/codehaus/mojo/animal-sniffer-annotations/1.17/animal-sniffer-annotations-1.17.jar:/home/dobrilla/.m2/repository/org/projectlombok/lombok/1.18.22/lombok-1.18.22.jar'
 -encoding
 'UTF-8'
 -protected
@@ -19,11 +19,11 @@
 -docencoding
 'UTF-8'
 -doctitle
-'MiniReal-Annotation 1.1.7 API'
+'MiniReal-Annotation 1.1.8 API'
 -use
 -version
 -windowtitle
-'MiniReal-Annotation 1.1.7 API'
+'MiniReal-Annotation 1.1.8 API'
 com.example.application.kafkaserialize
 org.simreal.annotation
 org.simreal.processor.DTO
@@ -49,7 +49,29 @@ org.simreal.processor
 /home/dobrilla/.m2/repository/org/springframework/retry/spring-retry/1.3.1/spring-retry-1.3.1.jar = 1610127867000
 /home/dobrilla/.m2/repository/javax/annotation/javax.annotation-api/1.3.2/javax.annotation-api-1.3.2.jar = 1657157845597
 /home/dobrilla/.m2/repository/org/apache/kafka/kafka-clients/3.0.0/kafka-clients-3.0.0.jar = 1631136767000
-/home/dobrilla/.m2/repository/com/example/libs/mason/20/mason-20.jar = 1708498382006
+/home/dobrilla/.m2/repository/org/pazd/mason/mason/20/mason-20.jar = 1747737709703
+/home/dobrilla/.m2/repository/java3d/j3d-core/1.3.1/j3d-core-1.3.1.jar = 1122889251000
+/home/dobrilla/.m2/repository/java3d/vecmath/1.3.1/vecmath-1.3.1.jar = 1122889252000
+/home/dobrilla/.m2/repository/java3d/j3d-core-utils/1.3.1/j3d-core-utils-1.3.1.jar = 1122889251000
+/home/dobrilla/.m2/repository/org/beanshell/bsh/2.0b4/bsh-2.0b4.jar = 1676484488427
+/home/dobrilla/.m2/repository/com/lowagie/itext/1.2.3/itext-1.2.3.jar = 1150990609000
+/home/dobrilla/.m2/repository/org/jfree/jcommon/1.0.24/jcommon-1.0.24.jar = 1487432380000
+/home/dobrilla/.m2/repository/org/jfree/jfreechart/1.0.17/jfreechart-1.0.17.jar = 1392128703000
+/home/dobrilla/.m2/repository/xml-apis/xml-apis/1.3.04/xml-apis-1.3.04.jar = 1657158073490
+/home/dobrilla/.m2/repository/javax/media/jmf/2.1.1e/jmf-2.1.1e.jar = 1274316467000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all-main/2.3.1/jogl-all-main-2.3.1.jar = 1427497911000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1.jar = 1427496863000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-android-aarch64.jar = 1427496871000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-android-armv6.jar = 1427496876000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-linux-amd64.jar = 1427496881000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-linux-armv6.jar = 1427496886000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-linux-armv6hf.jar = 1427496893000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-linux-i586.jar = 1427496899000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-macosx-universal.jar = 1427496909000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-solaris-amd64.jar = 1427496919000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-solaris-i586.jar = 1427496924000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-windows-amd64.jar = 1427496931000
+/home/dobrilla/.m2/repository/org/jogamp/jogl/jogl-all/2.3.1/jogl-all-2.3.1-natives-windows-i586.jar = 1427496937000
 /home/dobrilla/.m2/repository/com/google/auto/service/auto-service/1.0-rc6/auto-service-1.0-rc6.jar = 1563305836000
 /home/dobrilla/.m2/repository/com/google/auto/service/auto-service-annotations/1.0-rc6/auto-service-annotations-1.0-rc6.jar = 1563305828000
 /home/dobrilla/.m2/repository/com/google/auto/auto-common/0.10/auto-common-0.10.jar = 1516287983000
@@ -63,21 +85,21 @@ org.simreal.processor
 /home/dobrilla/.m2/repository/org/projectlombok/lombok/1.18.22/lombok-1.18.22.jar = 1660625562390
 /media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/src/main/java = 1710834620960
 /media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/generated-sources/annotations = 1747654425431
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/allclasses-index.html = 1747654428172
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/allpackages-index.html = 1747654428173
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/element-list = 1747654428102
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/help-doc.html = 1747654428192
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/index-all.html = 1747654428189
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/index.html = 1747654428161
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/jquery-ui.overrides.css = 1747654428196
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/member-search-index.js = 1747654428175
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/module-search-index.js = 1747654428174
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/overview-summary.html = 1747654428190
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/overview-tree.html = 1747654428160
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/package-search-index.js = 1747654428174
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/script.js = 1747654428193
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/search.js = 1747654428194
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/serialized-form.html = 1747654428129
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/stylesheet.css = 1747654428193
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/tag-search-index.js = 1747654428175
-/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/type-search-index.js = 1747654428174
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/allclasses-index.html = 1747792193309
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/allpackages-index.html = 1747792193310
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/element-list = 1747792193242
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/help-doc.html = 1747792193328
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/index-all.html = 1747792193325
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/index.html = 1747792193299
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/jquery-ui.overrides.css = 1747792193333
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/member-search-index.js = 1747792193311
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/module-search-index.js = 1747792193311
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/overview-summary.html = 1747792193326
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/overview-tree.html = 1747792193296
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/package-search-index.js = 1747792193311
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/script.js = 1747792193329
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/search.js = 1747792193330
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/serialized-form.html = 1747792193267
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/stylesheet.css = 1747792193329
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/tag-search-index.js = 1747792193312
+/media/storage/Projects/BaLab ABM System/Z_mini_simreal/minireal-annotation-processor/target/apidocs/type-search-index.js = 1747792193311

@@ -93,13 +93,11 @@
       <version>2.8.0</version>
     </dependency>
 
-    <!-- Local JAR on the file system (system scope) -->
+    <!-- MASON library dependency   -->
     <dependency>
-      <groupId>com.example.libs</groupId>
+      <groupId>org.pazd.mason</groupId>
       <artifactId>mason</artifactId>
       <version>20</version>
-<!--      <scope>system</scope>-->
-<!--      <systemPath>${project.basedir}/libs/mason.20.jar</systemPath>-->
     </dependency>
 
     <!-- Annotation processors and compile-only libs -->
